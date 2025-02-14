@@ -1,0 +1,180 @@
+app:
+  title: Scaffolded Backstage App
+  baseUrl: http://localhost:3000
+
+organization:
+  name: Fintech
+
+githubDeployments:
+  githubToken: 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
+
+backend:
+  # Used for enabling authentication, secret is shared by all backend plugins
+  # See https://backstage.io/docs/auth/service-to-service-auth for
+  # information on the format
+  # auth:
+  #   keys:
+  #     - secret: ${BACKEND_SECRET}
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+    # Uncomment the following host directive to bind to specific interfaces
+    # host: 127.0.0.1
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+    # Content-Security-Policy directives follow the Helmet format: https://helmetjs.github.io/#reference
+    # Default Helmet Content-Security-Policy values can be removed by setting the key to false
+  cors:
+    origin: http://localhost:3000
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  # This is for local development only, it is not recommended to use this in production
+  # The production database configuration is stored in app-config.production.yaml
+  database:
+    client: better-sqlite3
+    connection: ':memory:'
+  # workingDirectory: /tmp # Use this to configure a working directory for the scaffolder, defaults to the OS temp-dir
+
+integrations:
+  github:
+    - host: github.com
+      token: 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
+      apiBaseUrl: https://api.github.com
+      rawBaseUrl: https://raw.githubusercontent.com
+
+# integrations:
+#   github:
+#     - host: github.com
+#       # This is a Personal Access Token or PAT from GitHub. You can find out how to generate this token, and more information
+#       # about setting up the GitHub integration here: https://backstage.io/docs/integrations/github/locations#configuration
+#       token: ${GITHUB_TOKEN}
+#     ### Example for how to add your GitHub Enterprise instance using the API:
+#     # - host: ghe.example.net
+#     #   apiBaseUrl: https://ghe.example.net/api/v3
+#     #   token: ${GHE_TOKEN}
+
+proxy:
+  ### Example for how to add a proxy endpoint for the frontend.
+  ### A typical reason to do this is to handle HTTPS and CORS for internal services.
+  # endpoints:
+  #   '/test':
+  #     target: 'https://example.com'
+  #     changeOrigin: true
+
+# Reference documentation http://backstage.io/docs/features/techdocs/configuration
+# Note: After experimenting with basic setup, use CI/CD to generate docs
+# and an external cloud storage when deploying TechDocs for production use-case.
+# https://backstage.io/docs/features/techdocs/how-to-guides#how-to-migrate-from-techdocs-basic-to-recommended-deployment-approach
+techdocs:
+  builder: 'local' # Alternatives - 'external'
+  generator:
+    runIn: 'docker' # Alternatives - 'local'
+  publisher:
+    type: 'local' # Alternatives - 'googleGcs' or 'awsS3'. Read documentation for using alternatives.
+
+auth:
+  # see https://backstage.io/docs/auth/ to learn about auth providers
+  environment: development
+  providers:
+    # See https://backstage.io/docs/auth/guest/provider
+    guest: {}
+    github:
+      development:
+        clientId: Ov23liXTolmAZj4HJQ1J
+        clientSecret: 8ef6db673297ff9b241824b8ce814f0fd7b2b120
+        signIn:
+          resolvers:
+            # Matches the GitHub username with the Backstage user entity name.
+            # See https://backstage.io/docs/auth/github/provider#resolvers for more resolvers.
+            - resolver: usernameMatchingUserEntityName
+scaffolder:
+  # see https://backstage.io/docs/features/software-templates/configuration for software template options
+
+catalog:
+  providers:
+    github:
+      open-banking:
+        organization: gexcode
+        filters:
+          repository: "^a208269-br-fintech_open.*"
+        branch: main
+        catalogPath: '**/catalog-info.yaml'
+        schedule:
+          frequency: 30s  # Atualiza a cada 30 minutos
+          timeout: 3m
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location]
+  locations:
+    # Local example data, file locations are relative to the backend process, typically `packages/backend`
+    # - type: file
+    #   target: ../../examples/entities.yaml
+
+    # Local example template
+    - type: file
+      target: ../../examples/template/template.yaml
+      rules:
+        - allow: [Template]
+
+    # Local example template
+    - type: file
+      target: ../../examples/template/archimate.yaml
+      rules:
+        - allow: [Template]
+
+    # Local example organizational data
+    - type: file
+      target: ../../examples/org.yaml
+      rules:
+        - allow: [User, Group]
+
+    ## Uncomment these lines to add more example data
+    # - type: url
+    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/all.yaml
+
+    ## Uncomment these lines to add an example org
+    # - type: url
+    #   target: https://github.com/backstage/backstage/blob/master/packages/catalog-model/examples/acme-corp.yaml
+    #   rules:
+    #     - allow: [User, Group]
+
+kubernetes:
+  frontend:
+    podDelete:
+      enabled: true
+  serviceLocatorMethod:
+    type: 'multiTenant'
+  clusterLocatorMethods:
+    - type: 'config'
+      clusters:
+        - url: https://127.0.0.1:6550
+          name: Default
+          authProvider: 'serviceAccount'
+          serviceAccountToken: eyJhbGciOiJSUzI1NiIsImtpZCI6ImJtaXV1S0g0MDIzRUNhWTRqRlNPbFF2ME1haF9pa3Vpdkp6aXZRMEpXZGMifQ.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJkZWZhdWx0Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZWNyZXQubmFtZSI6ImJhY2tzdGFnZS1zZWNyZXQiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiYmFja3N0YWdlLXNhIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiOWU0MjE1ZGEtZjc5NS00ZWNhLWEyZmItY2Q5ZGRlMzE2MDI3Iiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50OmRlZmF1bHQ6YmFja3N0YWdlLXNhIn0.CVOqUvodDYCAmSRtoLLSWcjLqQd43kwI2E9mRo7Cnp1JS_L_-yq-r2IrK0UwaRW74t7cdPZ0HamEJ23F3ya1U04EOum8MCSI3bL-Eu073mylhhH8EP10phe_taHrcZJOze7bw2HQTTGrgMxh99Pjk1jqpEWiurPKLSBDGXLFVEZJtcrdLm-Q7sRIRBvrhsrFL_Z23-Azimy-GGmg6nrUAaxhJNjlNvqkSysVrygIHfwExBWdiIzW3vtUNY2fz3utzkJgoKczimL1hdi3lKUjqE7ihP1zM585A_b53J4WU_55CRq7WcFFFTx2DlG4g6abfsAjH_W-B33Dv-IcbL36wQ
+          skipTLSVerify: true
+          skipMetricsLookup: false
+          dashboardUrl: https://127.0.0.1:8443
+          dashboardApp: standard
+gitops:
+  #
+  baseUrl: http://127.0.0.1:9001/
+
+costInsights:
+  engineerCost: 200000
+  products:
+    productA:
+      name: Some Cloud Product
+      icon: storage
+    productB:
+      name: Some Other Cloud Product
+      icon: data
+  metrics:
+    metricA:
+      name: Metric A ## required
+      default: true
+    metricB:
+      name: Metric B
+    metricC:
+      name: Metric C          

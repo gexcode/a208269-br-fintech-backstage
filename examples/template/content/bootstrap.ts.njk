@@ -1,0 +1,8 @@
+// Arquivo bootstrap.ts
+export class Bootstrap {
+  {% for component in components %}
+  public static create{{ component | capitalize }}() {
+    console.log("Criando componente: {{ component }}");
+  }
+  {% endfor %}
+}
