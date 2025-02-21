@@ -1,12 +1,12 @@
 app:
   title: Scaffolded Backstage App
-  baseUrl: http://localhost:3000
+  baseUrl: http://localhost:3001
 
 organization:
   name: Fintech
 
 githubDeployments:
-  githubToken: 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
+  githubToken: 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
 
 backend:
   # Used for enabling authentication, secret is shared by all backend plugins
@@ -38,7 +38,7 @@ backend:
 integrations:
   github:
     - host: github.com
-      token: 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
+      token: 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
       apiBaseUrl: https://api.github.com
       rawBaseUrl: https://raw.githubusercontent.com
 
@@ -96,7 +96,7 @@ catalog:
       open-banking:
         organization: gexcode
         filters:
-          repository: "^a208269-br-fintech_open.*"
+          repository: "^a208269-br-fintech_application.*"
         branch: main
         catalogPath: '**/catalog-info.yaml'
         schedule:
